@@ -1,0 +1,143 @@
+<!-- Local rules -->
+
+<!-- Modify it at your will. -->
+<!-- Copyright (C) 2015, Wazuh Inc. -->
+
+<!-- Example -->
+<group name="local,syslog,sshd,">
+
+  <!--
+  Dec 10 01:02:02 host sshd[1234]: Failed none for root from 1.1.1.1 port 1066 ssh2
+  -->
+  <rule id="100001" level="5">
+    <if_sid>5716</if_sid>
+    <srcip>1.1.1.1</srcip>
+    <description>sshd: authentication failed from IP 1.1.1.1.</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+</group>
+
+<group name="local,audit_watch,">
+  <rule id="100100" level="7">
+    <if_group>audit</if_group>
+    <field name="audit.key">passwd_acces</field>
+    <description>Acces en lecture a /etc/passwd detecte via auditd (MITRE T1087.001 - Account discovery)</description>
+    <mitre>
+      <id>T1087.001</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="local,audit_watch,">
+  <rule id="100101" level="7">
+    <if_group>audit</if_group>
+    <field name="audit.key">bash_exec</field>
+    <field name="audit.exe">/usr/bin/bash</field>
+    <description>Execution manuelle de bash detectee via auditd (MITRE T1059.004 - Unix Shell)</description>
+    <mitre>
+      <id>T1059.004</id>
+    </mitre>
+  </rule>
+  <rule id="100102" level="1">
+    <if_sid>100101</if_sid>
+    <field name="audit.command">cpuUsage.sh</field>
+    <description>Execution bash legitime (VS Code Remote-SSH) - bruit filtre</description>
+    <options>no_log</options>
+  </rule>
+</group>
+
+<group name="local,audit_watch,">
+  <rule id="100103" level="5">
+    <if_group>audit</if_group>
+    <field name="audit.key">os_discovery</field>
+    <description>Lecture des informations systeme (/etc/os-release) detectee via auditd (MITRE T1082 - System Information Discovery)</description>
+    <mitre>
+      <id>T1082</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="local,audit_watch,">
+  <rule id="100104" level="12">
+    <if_group>audit</if_group>
+    <field name="audit.key">kernel_module_load</field>
+    <description>Chargement d'un module noyau detecte via auditd (MITRE T1547.006 - Boot or Logon Autostart Execution: Kernel Modules)</description>
+    <mitre>
+      <id>T1547.006</id>
+    </mitre>
+  </rule>
+</group>
+
+
+<group name="local,audit_watch,">
+  <rule id="100105" level="3">
+    <if_group>audit</if_group>
+    <field name="audit.key">masquerade_tmp_exec</field>
+    <description>Execution depuis /tmp detectee via auditd (bruit possible, voir regle fille pour la vraie detection)</description>
+  </rule>
+  <rule id="100106" level="12">
+    <if_sid>100105</if_sid>
+    <field name="audit.command" type="pcre2">^(crond|cron|sshd|systemd|init|kworker)$</field>
+    <description>Processus se faisant passer pour un service systeme legitime, execute depuis /tmp (MITRE T1036.003 - Masquerading)</description>
+    <mitre>
+      <id>T1036.003</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="local,audit_watch,">
+  <rule id="100107" level="10">
+    <if_group>audit</if_group>
+    <field name="audit.key">credential_dump_tool</field>
+    <description>Execution de Python3 potentiellement liee a un outil de vol d'identifiants (MITRE T1555.003 - Credentials from Web Browsers)</description>
+    <mitre>
+      <id>T1555.003</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="local,audit_watch,">
+  <rule id="100108" level="8">
+    <if_group>audit</if_group>
+    <field name="audit.key">sandbox_evasion_check</field>
+    <description>Verification d'environnement virtualise detectee via auditd (MITRE T1497.001 - Virtualization/Sandbox Evasion)</description>
+    <mitre>
+      <id>T1497.001</id>
+    </mitre>
+  </rule>
+</group>
+
+
+<group name="local,windows,">
+  <rule id="100109" level="9">
+    <if_group>windows</if_group>
+    <field name="win.system.eventID">^4688$</field>
+    <field name="win.eventdata.newProcessName" type="pcre2">QuickAssist\.exe$</field>
+    <description>Lancement de Microsoft Quick Assist detecte (MITRE T1219 - Remote Access Tools)</description>
+    <mitre>
+      <id>T1219</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="local,windows,">
+  <rule id="100110" level="10">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.queryName" type="pcre2">^.{100,}$</field>
+    <description>Requete DNS anormalement longue detectee, possible canal C2 via DNS (MITRE T1071.004 - Application Layer Protocol: DNS)</description>
+    <mitre>
+      <id>T1071.004</id>
+    </mitre>
+  </rule>
+</group>
+
+<group name="local,windows,">
+  <rule id="100111" level="10" frequency="3" timeframe="60">
+    <if_matched_sid>100110</if_matched_sid>
+    <description>Canal C2 DNS confirme : plusieurs requetes DNS anormalement longues en moins d'une minute (MITRE T1071.004)</description>
+    <mitre>
+      <id>T1071.004</id>
+    </mitre>
+  </rule>
+</group>
