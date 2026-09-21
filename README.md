@@ -39,8 +39,3 @@ Choix de priorisation documentés dans le cahier des charges du projet :
 - [ ] Pipeline CI/CD (GitLab) pour le déploiement automatisé
 - [ ] Haute disponibilité du cluster Wazuh (perspective long terme,
       hors scope du sprint actuel)
-
-## Documentation complémentaire
-
-Journal technique, rapports d'incidents et cahier des charges détaillé
-maintenus séparément (voir livrables du projet).
