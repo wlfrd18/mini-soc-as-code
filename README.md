@@ -18,7 +18,15 @@ automatisée de rapports d'incidents.
 
 - `wazuh-rules/` : règles de détection personnalisées (copie versionnée
   de local_rules.xml, à resynchroniser manuellement après modification)
-- `scripts/` : scripts d'automatisation (export MITRE ATT&CK Navigator, etc.)
+- `scripts/` : scripts d'automatisation
+  - `auditd-rules/install-audit-rules.sh` : installation complète des règles
+    auditd Linux en une commande
+  - `windows-audit-config/` : configuration de l'audit Windows
+    (politique d'audit, registre) et automatisation du profil PowerShell
+  - `active-response/quarantine-masquerade.sh` : script de réponse active
+    (quarantaine automatique sur détection de masquerading)
+  - `generate_navigator_layer.py` : export de la couverture MITRE ATT&CK
+    vers le format MITRE ATT&CK Navigator
 - `docs/` : documentation complémentaire
 
 ## Prérequis pour reproduire l'environnement
